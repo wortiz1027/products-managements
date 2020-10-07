@@ -19,9 +19,9 @@ spring:
         naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_SECURITY_HOST:localhost}:3302/securitydb?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
-    username: security
-    password: security2020++
+    url: jdbc:mysql://${DB_PRODUCT_QUERY_HOST:localhost}:3302/productquerydb?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
+    username: product
+    password: product2020++
     platform: mysql
     initialization-mode: always
     hikari:

@@ -1,0 +1,40 @@
+server:
+  port: 8081
+
+spring:
+  rabbitmq:
+    host: "${RABBITMQ_HOST:localhost}"
+    port: 5672
+    username: "${RABBITMQ_USER:pica}"
+    password: "${RABBITMQ_PASS:Pica2020++}"
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update # (create|none|update|create-drop|validate)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_PRODUCT_COMMAND_HOST:localhost}:3301/productcommanddb
+    username: product
+    password: product2020++
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.data: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+    co.edu.javeriana.products: DEBUG
+
+events:
+  amqp:
+    exchange: co.edu.javeriana.products.events
+    queue: products.command.queue
+    routing-key: PRODUCTS.KEY
+  dead-letter:
+    exchange: co.edu.javeriana.products.events
+    queue: products.command.queue
+    routing-key: DEAD.PRODUCTS.KEY

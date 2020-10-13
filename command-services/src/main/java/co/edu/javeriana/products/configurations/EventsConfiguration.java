@@ -1,5 +1,7 @@
 package co.edu.javeriana.products.configurations;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -13,6 +15,9 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import java.time.LocalDate;
 
 @Configuration
 public class EventsConfiguration {
@@ -69,36 +74,26 @@ public class EventsConfiguration {
     }
 
     @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    @Primary
+    public ObjectMapper serializingObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        JavaTimeModule module = new JavaTimeModule();
+        module.addSerializer(LocalDate.class, new LocalDateSerializer());
+        module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+        mapper.registerModule(module);
+        return mapper;
     }
 
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter(serializingObjectMapper());
+    }
+
+    @Bean
     public AmqpTemplate template(ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         return rabbitTemplate;
     }
-
-    /*@Bean
-    public Exchange exchange(){
-        return ExchangeBuilder.fanoutExchange(exchangeName).build();
-    }
-
-    @Bean
-    public Queue queue(){
-        return QueueBuilder.durable(exchangeName).build();
-    }
-
-    @Bean
-    public Binding binding(Queue queue, Exchange exchange){
-        return BindingBuilder.bind(queue).to(exchange).with("*").noargs();
-    }
-
-    @Autowired
-    public void configure(AmqpAdmin amqpAdmin, Exchange exchange, Queue queue, Binding binding){
-        amqpAdmin.declareExchange(exchange);
-        amqpAdmin.declareQueue(queue);
-        amqpAdmin.declareBinding(binding);
-    }*/
 
 }

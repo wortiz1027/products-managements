@@ -1,5 +1,7 @@
 server:
   port: 8081
+  servlet:
+    context-path: /products
 
 spring:
   rabbitmq:
@@ -7,19 +9,24 @@ spring:
     port: 5672
     username: "${RABBITMQ_USER:pica}"
     password: "${RABBITMQ_PASS:Pica2020++}"
-  jpa:
-    generate-ddl: true
-    show-sql: true
-    hibernate:
-      ddl-auto: update # (create|none|update|create-drop|validate)
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_PRODUCT_COMMAND_HOST:localhost}:3301/productcommanddb
     username: product
     password: product2020++
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+events:
+  amqp:
+    exchange: products-exchange-events
+    queue: products-queue-command
+    routing-key: products-command-key
+  dead-letter:
+    exchange: products-exchange-deadletter
+    queue: products-queue-deadletter
+    routing-key: products-deadletter-key
 
 logging:
   level:
@@ -28,13 +35,3 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
     co.edu.javeriana.products: DEBUG
-
-events:
-  amqp:
-    exchange: co.edu.javeriana.products.events
-    queue: products.command.queue
-    routing-key: PRODUCTS.KEY
-  dead-letter:
-    exchange: co.edu.javeriana.products.events
-    queue: products.command.queue
-    routing-key: DEAD.PRODUCTS.KEY

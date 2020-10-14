@@ -1,6 +1,7 @@
-package co.edu.javeriana.products.infraestructure.repository;
+package co.edu.javeriana.products.infraestructure.repository.products;
 
 import co.edu.javeriana.products.domain.Product;
+import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.domain.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -30,7 +31,7 @@ public class ProductMySqlRepository implements ProductRepository {
                                                             rs.getString("PRODUCT_DESCRIPTION"),
                                                             rs.getDate("START_DATE").toLocalDate(),
                                                             rs.getDate("END_DATE").toLocalDate(),
-                                                            rs.getString("PRODUCT_TYPE_ID"),
+                                                            new ProductType(rs.getString("PRODUCT_TYPE_ID"), "", ""),
                                                             rs.getLong("PRODUCT_PRICE"),
                                                             rs.getString("ORIGIN_CITY"),
                                                             rs.getString("DESTINATION_CITY"),
@@ -47,7 +48,7 @@ public class ProductMySqlRepository implements ProductRepository {
     @Override
     public CompletableFuture<String> create(Product product) {
         try {
-            if (!findById(product.getProductId()).isEmpty()) return CompletableFuture.completedFuture(Status.EXIST.name());
+            if (findById(product.getProductId()).isPresent()) return CompletableFuture.completedFuture(Status.EXIST.name());
 
             String sql = "INSERT INTO PRODUCTS (PRODUCT_ID, " +
                                                 "PRODUCT_CODE, " +
@@ -70,7 +71,7 @@ public class ProductMySqlRepository implements ProductRepository {
                             product.getProductDescription(),
                             product.getStartDate(),
                             product.getEndDate(),
-                            product.getIdType(),
+                            product.getType().getId(),
                             product.getProductPrice(),
                             product.getOriginCity(),
                             product.getDestinationCity(),
@@ -107,7 +108,7 @@ public class ProductMySqlRepository implements ProductRepository {
                                         product.getProductDescription(),
                                         product.getStartDate(),
                                         product.getEndDate(),
-                                        product.getIdType(),
+                                        product.getType().getId(),
                                         product.getProductPrice(),
                                         product.getOriginCity(),
                                         product.getDestinationCity(),
@@ -115,7 +116,7 @@ public class ProductMySqlRepository implements ProductRepository {
                                         product.getVendorId(),
                                         product.getProductId());
 
-            return CompletableFuture.completedFuture(Status.UPDATE.name());
+            return CompletableFuture.completedFuture(Status.UPDATED.name());
         } catch (Exception e) {
             return CompletableFuture.completedFuture(Status.ERROR.name());
         }

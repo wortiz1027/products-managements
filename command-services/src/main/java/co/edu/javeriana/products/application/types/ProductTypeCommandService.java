@@ -7,8 +7,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ProductTypeCommandService {
 
-    CompletableFuture<Response> createProductType(ProductType product);
-    CompletableFuture<Response> updateProductType(ProductType product);
-    CompletableFuture<Response> deleteProductType(ProductType product);
+    CompletableFuture<Response> createProductType(ProductType type);
+    CompletableFuture<Response> updateProductType(ProductType type);
+    CompletableFuture<Response> deleteProductType(ProductType type);
 
 }

@@ -19,7 +19,7 @@ public class Product {
     private String productDescription;
     private LocalDate startDate;
     private LocalDate endDate;
-    private String idType;
+    private ProductType type;
     private Long productPrice;
     private String originCity;
     private String destinationCity;

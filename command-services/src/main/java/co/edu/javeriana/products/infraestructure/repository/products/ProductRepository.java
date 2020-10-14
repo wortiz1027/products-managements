@@ -1,4 +1,4 @@
-package co.edu.javeriana.products.infraestructure.repository;
+package co.edu.javeriana.products.infraestructure.repository.products;
 
 import co.edu.javeriana.products.domain.Product;
 

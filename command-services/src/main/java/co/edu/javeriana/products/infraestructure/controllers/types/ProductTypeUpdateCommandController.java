@@ -20,7 +20,7 @@ public class ProductTypeUpdateCommandController {
 
     @PutMapping("/products/types")
     public CompletableFuture<Response> handle(@RequestBody ProductType data) {
-        return service.createProductType(data);
+        return service.updateProductType(data);
     }
 
 }

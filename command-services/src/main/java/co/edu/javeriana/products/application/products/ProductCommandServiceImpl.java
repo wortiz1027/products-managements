@@ -4,7 +4,7 @@ import co.edu.javeriana.products.domain.Product;
 
 import co.edu.javeriana.products.domain.Response;
 import co.edu.javeriana.products.domain.Status;
-import co.edu.javeriana.products.infraestructure.repository.ProductRepository;
+import co.edu.javeriana.products.infraestructure.repository.products.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.slf4j.Logger;
@@ -48,6 +48,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
             response.setStatus(Status.ERROR.name());
+            response.setDescription(String.format("Exception creating row has been release: {%s}", e.getMessage()));
             return CompletableFuture.completedFuture(response);
         }
 
@@ -60,21 +61,21 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             String status = this.repository.update(product).get();
             response.setStatus(status);
 
-            if (!status.equalsIgnoreCase(Status.UPDATE.name())) {
+            if (!status.equalsIgnoreCase(Status.UPDATED.name())) {
                 response.setDescription(String.format("The product with id: {%s} has an error", product.getProductCode()));
                 return CompletableFuture.completedFuture(response);
             }
 
             response.setDescription(String.format("The product with id: {%s} has been updated", product.getProductCode()));
-            product.setStatus(Status.UPDATE.name());
+            product.setStatus(Status.UPDATED.name());
             this.template.convertAndSend(productExchange, productRoutingKey, product);
 
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
             response.setStatus(Status.ERROR.name());
+            response.setDescription(String.format("Exception creating row has been release: {%s}", e.getMessage()));
             return CompletableFuture.completedFuture(response);
         }
-
     }
 
     @Override
@@ -96,6 +97,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
             response.setStatus(Status.ERROR.name());
+            response.setDescription(String.format("Exception creating row has been release: {%s}", e.getMessage()));
             return CompletableFuture.completedFuture(response);
         }
     }

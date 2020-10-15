@@ -9,6 +9,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,25 +20,30 @@ public class ProductMySqlRepository implements Repositories<Product> {
     private final JdbcTemplate template;
 
     @Override
+    public Optional<List<Product>> findByAll() {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Product> findById(String id) {
         try {
             String sql = "SELECT * FROM PRODUCTS WHERE PRODUCT_CODE = ?";
             return template.queryForObject(sql,
                     new Object[]{id},
                     (rs, rowNum) ->
-                            Optional.of(new Product(
-                                    rs.getString("PRODUCT_CODE"),
-                                    rs.getString("PRODUCT_NAME"),
-                                    rs.getString("PRODUCT_DESCRIPTION"),
-                                    rs.getDate("START_DATE").toLocalDate(),
-                                    rs.getDate("END_DATE").toLocalDate(),
-                                    new ProductType(rs.getString("PRODUCT_TYPE_ID"), "", ""),
-                                    rs.getLong("PRODUCT_PRICE"),
-                                    rs.getString("ORIGIN_CITY"),
-                                    rs.getString("DESTINATION_CITY"),
-                                    rs.getString("PRODUCT_IMAGE"),
-                                    rs.getString("VENDOR_ID"),
-                                    ""
+                            Optional.of(new Product(rs.getString("PRODUCT_CODE"),
+                                                    rs.getString("PRODUCT_CODE"),
+                                                    rs.getString("PRODUCT_NAME"),
+                                                    rs.getString("PRODUCT_DESCRIPTION"),
+                                                    rs.getDate("START_DATE").toLocalDate(),
+                                                    rs.getDate("END_DATE").toLocalDate(),
+                                                    new ProductType(rs.getString("PRODUCT_TYPE_ID"), "", ""),
+                                                    rs.getLong("PRODUCT_PRICE"),
+                                                    rs.getString("ORIGIN_CITY"),
+                                                    rs.getString("DESTINATION_CITY"),
+                                                    rs.getString("PRODUCT_IMAGE"),
+                                                    rs.getString("VENDOR_ID"),
+                                                    ""
                             ))
             );
         } catch (EmptyResultDataAccessException e) {
@@ -78,6 +84,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
 
             return CompletableFuture.completedFuture(Status.CREATED.name());
         } catch(Exception e) {
+            e.printStackTrace();
             return CompletableFuture.completedFuture(Status.ERROR.name());
         }
     }

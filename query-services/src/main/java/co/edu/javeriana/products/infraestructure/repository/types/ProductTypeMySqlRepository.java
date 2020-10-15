@@ -1,5 +1,6 @@
 package co.edu.javeriana.products.infraestructure.repository.types;
 
+import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.domain.Status;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
@@ -8,6 +9,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -16,6 +18,11 @@ import java.util.concurrent.CompletableFuture;
 public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
 
     private final JdbcTemplate template;
+
+    @Override
+    public Optional<List<ProductType>> findByAll() {
+        return Optional.empty();
+    }
 
     @Override
     public Optional<ProductType> findById(String id) {

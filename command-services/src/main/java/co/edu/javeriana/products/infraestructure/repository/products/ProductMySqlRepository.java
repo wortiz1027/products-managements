@@ -32,7 +32,6 @@ public class ProductMySqlRepository implements ProductRepository {
                                                             rs.getDate("START_DATE").toLocalDate(),
                                                             rs.getDate("END_DATE").toLocalDate(),
                                                             new ProductType(rs.getString("PRODUCT_TYPE_ID"), "", ""),
-                                                            //rs.getString("PRODUCT_TYPE_ID"),
                                                             rs.getLong("PRODUCT_PRICE"),
                                                             rs.getString("ORIGIN_CITY"),
                                                             rs.getString("DESTINATION_CITY"),

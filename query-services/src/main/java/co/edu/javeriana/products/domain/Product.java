@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Product {
 
-    private String productId;
+    //private String productId;
     private String productCode;
     private String productName;
     private String productDescription;

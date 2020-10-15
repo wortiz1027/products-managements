@@ -1,4 +1,4 @@
-package co.edu.javeriana.products.infraestructure;
+package co.edu.javeriana.products.infraestructure.controllers;
 
 import co.edu.javeriana.products.domain.Product;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package co.edu.javeriana.products.infraestructure;
+package co.edu.javeriana.products.infraestructure.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -14,9 +14,9 @@ spring:
     url: jdbc:mysql://${DB_PRODUCT_COMMAND_HOST:localhost}:3301/productcommanddb
     username: product
     password: product2020++
-  jackson:
-    serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
+  #jackson:
+  #  serialization:
+  #    WRITE_DATES_AS_TIMESTAMPS: false
 
 events:
   amqp:
@@ -32,6 +32,5 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.springframework.data: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+    org.springframework.amqp: DEBUG
     co.edu.javeriana.products: DEBUG

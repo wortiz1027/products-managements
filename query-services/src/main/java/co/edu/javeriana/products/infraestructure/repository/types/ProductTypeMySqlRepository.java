@@ -9,6 +9,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +22,9 @@ public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
 
     @Override
     public Optional<List<ProductType>> findByAll() {
-        return Optional.empty();
+        String sql = "SELECT * FROM PRODUCT_TYPE";
+        List<ProductType> types = this.template.query(sql, new ProductTypesRowMapper());
+        return Optional.of(types);
     }
 
     @Override
@@ -40,6 +43,12 @@ public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<List<ProductType>> findByText(String text) {
+        List<ProductType> types = new ArrayList<>();
+        return Optional.empty();
     }
 
     @Override

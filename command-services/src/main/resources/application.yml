@@ -14,9 +14,6 @@ spring:
     url: jdbc:mysql://${DB_PRODUCT_COMMAND_HOST:localhost}:3301/productcommanddb
     username: product
     password: product2020++
-  #jackson:
-  #  serialization:
-  #    WRITE_DATES_AS_TIMESTAMPS: false
 
 events:
   amqp:

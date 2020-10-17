@@ -21,7 +21,10 @@ public class ProductMySqlRepository implements Repositories<Product> {
 
     @Override
     public Optional<List<Product>> findByAll() {
-        return Optional.empty();
+        String sql = "SELECT * FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE";
+        List<Product> types = this.template.query(sql, new ProductRowMapper());
+
+        return Optional.of(types);
     }
 
     @Override
@@ -29,23 +32,37 @@ public class ProductMySqlRepository implements Repositories<Product> {
         try {
             String sql = "SELECT * FROM PRODUCTS WHERE PRODUCT_CODE = ?";
             return template.queryForObject(sql,
-                    new Object[]{id},
-                    (rs, rowNum) ->
-                            Optional.of(new Product(rs.getString("PRODUCT_CODE"),
-                                                    rs.getString("PRODUCT_CODE"),
-                                                    rs.getString("PRODUCT_NAME"),
-                                                    rs.getString("PRODUCT_DESCRIPTION"),
-                                                    rs.getDate("START_DATE").toLocalDate(),
-                                                    rs.getDate("END_DATE").toLocalDate(),
-                                                    new ProductType(rs.getString("PRODUCT_TYPE_ID"), "", ""),
-                                                    rs.getLong("PRODUCT_PRICE"),
-                                                    rs.getString("ORIGIN_CITY"),
-                                                    rs.getString("DESTINATION_CITY"),
-                                                    rs.getString("PRODUCT_IMAGE"),
-                                                    rs.getString("VENDOR_ID"),
-                                                    ""
-                            ))
-            );
+                                            new Object[]{id},
+                                            (rs, rowNum) ->
+                                                    Optional.of(new Product(rs.getString("PRODUCT_CODE"),
+                                                                            rs.getString("PRODUCT_CODE"),
+                                                                            rs.getString("PRODUCT_NAME"),
+                                                                            rs.getString("PRODUCT_DESCRIPTION"),
+                                                                            rs.getDate("START_DATE").toLocalDate(),
+                                                                            rs.getDate("END_DATE").toLocalDate(),
+                                                                            new ProductType(rs.getString("PRODUCT_TYPE_ID"), "", ""),
+                                                                            rs.getLong("PRODUCT_PRICE"),
+                                                                            rs.getString("ORIGIN_CITY"),
+                                                                            rs.getString("DESTINATION_CITY"),
+                                                                            rs.getString("PRODUCT_IMAGE"),
+                                                                            rs.getString("VENDOR_ID"),
+                                                                            ""
+                                                    ))
+                                    );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<List<Product>> findByText(String text) {
+        try {
+            String sql = "SELECT * " +
+                         "FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE " +
+                         "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? )";
+
+            List<Product> types = this.template.query(sql, new Object[] { text }, new ProductRowMapper());
+            return Optional.of(types);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

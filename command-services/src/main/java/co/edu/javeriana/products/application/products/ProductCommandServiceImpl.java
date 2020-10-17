@@ -47,7 +47,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             response.setDescription(String.format("The product with id: {%s} has been created", product.getProductCode()));
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
-            e.printStackTrace();
             response.setStatus(Status.ERROR.name());
             response.setDescription(String.format("Exception creating row has been release: {%s}", e.getMessage()));
             return CompletableFuture.completedFuture(response);
@@ -73,7 +72,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
             response.setStatus(Status.ERROR.name());
-            response.setDescription(String.format("Exception creating row has been release: {%s}", e.getMessage()));
+            response.setDescription(String.format("Exception updating row has been release: {%s}", e.getMessage()));
             return CompletableFuture.completedFuture(response);
         }
     }
@@ -97,7 +96,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
             response.setStatus(Status.ERROR.name());
-            response.setDescription(String.format("Exception creating row has been release: {%s}", e.getMessage()));
+            response.setDescription(String.format("Exception deleting row has been release: {%s}", e.getMessage()));
             return CompletableFuture.completedFuture(response);
         }
     }

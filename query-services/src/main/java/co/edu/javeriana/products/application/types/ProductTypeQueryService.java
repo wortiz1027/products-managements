@@ -1,11 +1,13 @@
 package co.edu.javeriana.products.application.types;
 
-import co.edu.javeriana.products.domain.ProductType;
+import co.edu.javeriana.products.application.dtos.types.Response;
+import co.edu.javeriana.products.application.dtos.types.ResponseType;
 
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface ProductTypeQueryService {
 
-    List<ProductType> getAllTypes();
+    CompletableFuture<Response> getAllTypes();
+    CompletableFuture<ResponseType> getTypeById(String id);
 
 }

@@ -6,5 +6,7 @@ public enum Status {
     DELETED,
     ERROR,
     EXIST,
-    NO_EXIST
+    NO_EXIST,
+    EMPTY,
+    SUCCESS
 }

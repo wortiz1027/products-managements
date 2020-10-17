@@ -72,7 +72,6 @@ public class ProductMySqlRepository implements ProductRepository {
                             product.getStartDate(),
                             product.getEndDate(),
                             product.getType().getId(),
-                    //product.getType(),
                             product.getProductPrice(),
                             product.getOriginCity(),
                             product.getDestinationCity(),

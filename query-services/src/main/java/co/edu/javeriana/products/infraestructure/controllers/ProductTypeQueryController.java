@@ -1,11 +1,52 @@
 package co.edu.javeriana.products.infraestructure.controllers;
 
+import co.edu.javeriana.products.application.dtos.types.Response;
+import co.edu.javeriana.products.application.dtos.types.ResponseType;
+import co.edu.javeriana.products.application.types.ProductTypeQueryService;
+import co.edu.javeriana.products.domain.ProductType;
+import co.edu.javeriana.products.domain.Status;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class ProductTypeQueryController {
+
+    private final ProductTypeQueryService service;
+
+    @PostMapping("/products/types")
+    public ResponseEntity<CompletableFuture<Response>> allTypes() throws ExecutionException, InterruptedException {
+
+        CompletableFuture<Response> rs = service.getAllTypes();
+
+        if (rs.get().getStatus().getCode().equalsIgnoreCase(Status.SUCCESS.name()))
+            return new ResponseEntity<>(rs, HttpStatus.OK);
+
+        if (rs.get().getStatus().getCode().equalsIgnoreCase(Status.EMPTY.name()))
+            return new ResponseEntity<>(rs, HttpStatus.NO_CONTENT);
+
+        return new ResponseEntity<>(rs, HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/products/types/{id}")
+    public ResponseEntity<CompletableFuture<ResponseType>> typesById(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
+
+        if (id.isEmpty()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        CompletableFuture<ResponseType> rs = service.getTypeById(id);
+
+        if (rs.get().getStatus().getCode().equalsIgnoreCase(Status.SUCCESS.name()))
+            return new ResponseEntity<>(rs, HttpStatus.OK);
+
+        if (rs.get().getStatus().getCode().equalsIgnoreCase(Status.EMPTY.name()))
+            return new ResponseEntity<>(rs, HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(rs, HttpStatus.NO_CONTENT);
+    }
 }

@@ -36,7 +36,7 @@ public class ProductQueryController {
         return new ResponseEntity<>(rs, HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/products/")
+    @PostMapping("/products/text")
     public ResponseEntity<CompletableFuture<ResponseProduct>> text(@RequestParam(name = "text") String text) throws ExecutionException, InterruptedException {
         CompletableFuture<ResponseProduct> rs = service.getProductsByText(text);
 

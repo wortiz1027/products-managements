@@ -2,6 +2,7 @@ package co.edu.javeriana.products.infraestructure.repository.products;
 
 import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.ProductType;
+import co.edu.javeriana.products.events.dtos.Image;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -15,6 +16,9 @@ public class ProductRowMapper implements RowMapper<Product> {
         type.setId(rs.getString("ID_TYPE"));
         type.setDescription(rs.getString("DESCRIPTION"));
 
+        Image image = new Image();
+        image.setId(rs.getString("PRODUCT_IMAGE"));
+
         Product product = new Product();
         product.setProductCode(rs.getString("PRODUCT_CODE"));
         product.setProductName(rs.getString("PRODUCT_NAME"));
@@ -25,7 +29,7 @@ public class ProductRowMapper implements RowMapper<Product> {
         product.setProductPrice(rs.getLong("PRODUCT_PRICE"));
         product.setOriginCity(rs.getString("ORIGIN_CITY"));
         product.setDestinationCity(rs.getString("DESTINATION_CITY"));
-        product.setImageId(rs.getString("PRODUCT_IMAGE"));
+        product.setImage(image);
         product.setVendorId(rs.getString("VENDOR_ID"));
 
         return product;

@@ -23,7 +23,7 @@ public class Product {
     private Long productPrice;
     private String originCity;
     private String destinationCity;
-    private String imageId;
+    private Image image;
     private String vendorId;
     private String status;
 

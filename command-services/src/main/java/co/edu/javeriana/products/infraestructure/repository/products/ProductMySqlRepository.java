@@ -1,5 +1,6 @@
 package co.edu.javeriana.products.infraestructure.repository.products;
 
+import co.edu.javeriana.products.domain.Image;
 import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.domain.Status;
@@ -35,7 +36,7 @@ public class ProductMySqlRepository implements ProductRepository {
                                                             rs.getLong("PRODUCT_PRICE"),
                                                             rs.getString("ORIGIN_CITY"),
                                                             rs.getString("DESTINATION_CITY"),
-                                                            rs.getString("PRODUCT_IMAGE"),
+                                                            new Image(rs.getString("PRODUCT_IMAGE"), ""),
                                                             rs.getString("VENDOR_ID"),
                                                             ""
                                                     ))
@@ -75,7 +76,7 @@ public class ProductMySqlRepository implements ProductRepository {
                             product.getProductPrice(),
                             product.getOriginCity(),
                             product.getDestinationCity(),
-                            product.getImageId(),
+                            product.getImage().getId(),
                             product.getVendorId());
 
             return CompletableFuture.completedFuture(Status.CREATED.name());
@@ -109,11 +110,10 @@ public class ProductMySqlRepository implements ProductRepository {
                                         product.getStartDate(),
                                         product.getEndDate(),
                                         product.getType().getId(),
-                                        //product.getType(),
                                         product.getProductPrice(),
                                         product.getOriginCity(),
                                         product.getDestinationCity(),
-                                        product.getImageId(),
+                                        product.getImage().getId(),
                                         product.getVendorId(),
                                         product.getProductId());
 

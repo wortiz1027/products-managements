@@ -3,6 +3,7 @@ package co.edu.javeriana.products.infraestructure.repository.products;
 import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.domain.Status;
+import co.edu.javeriana.products.events.dtos.Image;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -44,7 +45,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                                                                             rs.getLong("PRODUCT_PRICE"),
                                                                             rs.getString("ORIGIN_CITY"),
                                                                             rs.getString("DESTINATION_CITY"),
-                                                                            rs.getString("PRODUCT_IMAGE"),
+                                                                            new Image(rs.getString("PRODUCT_IMAGE"), ""),
                                                                             rs.getString("VENDOR_ID"),
                                                                             ""
                                                     ))
@@ -96,7 +97,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                             data.getProductPrice(),
                             data.getOriginCity(),
                             data.getDestinationCity(),
-                            data.getImageId(),
+                            data.getImage().getId(),
                             data.getVendorId());
 
             return CompletableFuture.completedFuture(Status.CREATED.name());
@@ -132,7 +133,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                                       data.getProductPrice(),
                                       data.getOriginCity(),
                                       data.getDestinationCity(),
-                                      data.getImageId(),
+                                      data.getImage().getId(),
                                       data.getVendorId(),
                                       data.getProductCode());
 

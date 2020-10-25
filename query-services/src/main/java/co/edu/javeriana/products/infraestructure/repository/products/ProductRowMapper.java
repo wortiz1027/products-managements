@@ -20,6 +20,7 @@ public class ProductRowMapper implements RowMapper<Product> {
         image.setId(rs.getString("PRODUCT_IMAGE"));
 
         Product product = new Product();
+        product.setProductId(rs.getString("PRODUCT_ID"));
         product.setProductCode(rs.getString("PRODUCT_CODE"));
         product.setProductName(rs.getString("PRODUCT_NAME"));
         product.setProductDescription(rs.getString("PRODUCT_DESCRIPTION"));

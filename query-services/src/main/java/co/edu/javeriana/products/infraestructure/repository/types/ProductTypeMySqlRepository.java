@@ -6,6 +6,9 @@ import co.edu.javeriana.products.domain.Status;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -21,10 +24,10 @@ public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
     private final JdbcTemplate template;
 
     @Override
-    public Optional<List<ProductType>> findByAll() {
+    public Optional<Page<ProductType>> findByAll(Pageable paging) {
         String sql = "SELECT * FROM PRODUCT_TYPE";
         List<ProductType> types = this.template.query(sql, new ProductTypesRowMapper());
-        return Optional.of(types);
+        return Optional.of(new PageImpl<ProductType>(types, paging, count()));
     }
 
     @Override
@@ -46,9 +49,13 @@ public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
     }
 
     @Override
-    public Optional<List<ProductType>> findByText(String text) {
+    public Optional<Page<ProductType>> findByText(String text, Pageable paging) {
         List<ProductType> types = new ArrayList<>();
         return Optional.empty();
+    }
+
+    private int count() {
+        return this.template.queryForObject("SELECT count(*) FROM PRODUCT_TYPE", Integer.class);
     }
 
     @Override

@@ -3,9 +3,10 @@ package co.edu.javeriana.products.infraestructure.controllers;
 import co.edu.javeriana.products.application.dtos.types.Response;
 import co.edu.javeriana.products.application.dtos.types.ResponseType;
 import co.edu.javeriana.products.application.types.ProductTypeQueryService;
-import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.domain.Status;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,11 @@ public class ProductTypeQueryController {
     private final ProductTypeQueryService service;
 
     @PostMapping("/products/types")
-    public ResponseEntity<CompletableFuture<Response>> allTypes() throws ExecutionException, InterruptedException {
+    public ResponseEntity<CompletableFuture<Response>> allTypes(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "5") int size) throws ExecutionException, InterruptedException {
+        Pageable paging = PageRequest.of(page, size);
 
-        CompletableFuture<Response> rs = service.getAllTypes();
+        CompletableFuture<Response> rs = service.getAllTypes(paging);
 
         if (rs.get().getStatus().getCode().equalsIgnoreCase(Status.SUCCESS.name()))
             return new ResponseEntity<>(rs, HttpStatus.OK);

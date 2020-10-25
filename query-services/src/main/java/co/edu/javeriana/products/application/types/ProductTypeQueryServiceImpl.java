@@ -3,9 +3,12 @@ package co.edu.javeriana.products.application.types;
 import co.edu.javeriana.products.application.dtos.Status;
 import co.edu.javeriana.products.application.dtos.types.Response;
 import co.edu.javeriana.products.application.dtos.types.ResponseType;
+import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,11 +22,11 @@ public class ProductTypeQueryServiceImpl implements ProductTypeQueryService {
     private final Repositories<ProductType> types;
 
     @Override
-    public CompletableFuture<Response> getAllTypes() {
+    public CompletableFuture<Response> getAllTypes(Pageable paging) {
         Response response = new Response();
         Status status = new Status();
         try {
-            Optional<List<ProductType>> types = this.types.findByAll();
+            Optional<Page<ProductType>> types = this.types.findByAll(paging);
 
             if (types.isEmpty()) {
                 status.setCode(co.edu.javeriana.products.domain.Status.EMPTY.name());
@@ -31,11 +34,12 @@ public class ProductTypeQueryServiceImpl implements ProductTypeQueryService {
                 response.setStatus(status);
                 return CompletableFuture.completedFuture(response);
             }
+            List<ProductType> tps = types.get().getContent();
 
             status.setCode(co.edu.javeriana.products.domain.Status.SUCCESS.name());
             status.setDescription("Rows found!");
             response.setStatus(status);
-            response.setTypes(types.get());
+            response.setTypes(tps);
 
             return CompletableFuture.completedFuture(response);
         } catch(Exception e) {

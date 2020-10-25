@@ -7,8 +7,11 @@ import co.edu.javeriana.products.events.dtos.Image;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,11 +24,16 @@ public class ProductMySqlRepository implements Repositories<Product> {
     private final JdbcTemplate template;
 
     @Override
-    public Optional<List<Product>> findByAll() {
-        String sql = "SELECT * FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE";
-        List<Product> types = this.template.query(sql, new ProductRowMapper());
+    public Optional<Page<Product>> findByAll(Pageable paging) {
+        String sql = "SELECT * " +
+                     "FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE " +
+                     "ORDER BY PRODUCT_NAME ASC " +
+                     "LIMIT %d OFFSET %d";
 
-        return Optional.of(types);
+        List<Product> products = this.template.query(String.format(sql, paging.getPageSize(), paging.getOffset()),
+                                                  new ProductRowMapper());
+
+        return Optional.of(new PageImpl<>(products, paging, count()));
     }
 
     @Override
@@ -35,7 +43,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
             return template.queryForObject(sql,
                                             new Object[]{id},
                                             (rs, rowNum) ->
-                                                    Optional.of(new Product(rs.getString("PRODUCT_CODE"),
+                                                    Optional.of(new Product(rs.getString("PRODUCT_ID"),
                                                                             rs.getString("PRODUCT_CODE"),
                                                                             rs.getString("PRODUCT_NAME"),
                                                                             rs.getString("PRODUCT_DESCRIPTION"),
@@ -56,17 +64,24 @@ public class ProductMySqlRepository implements Repositories<Product> {
     }
 
     @Override
-    public Optional<List<Product>> findByText(String text) {
+    public Optional<Page<Product>> findByText(String text, Pageable paging) {
         try {
             String sql = "SELECT * " +
                          "FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE " +
-                         "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? )";
+                         "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? ) " +
+                         "ORDER BY PRODUCT_CODE ASC " +
+                         "LIMIT %d OFFSET %d";
 
-            List<Product> types = this.template.query(sql, new Object[] { text }, new ProductRowMapper());
-            return Optional.of(types);
+            List<Product> products = this.template.query(String.format(sql, paging.getPageSize(), paging.getOffset()), new Object[] { text }, new ProductRowMapper());
+
+            return Optional.of(new PageImpl<>(products, paging, count()));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    private int count() {
+        return this.template.queryForObject("SELECT count(*) FROM PRODUCTS", Integer.class);
     }
 
     @Override
@@ -74,7 +89,8 @@ public class ProductMySqlRepository implements Repositories<Product> {
         try {
             if (findById(data.getProductCode()).isPresent()) return CompletableFuture.completedFuture(Status.EXIST.name());
 
-            String sql = "INSERT INTO PRODUCTS (PRODUCT_CODE, " +
+            String sql = "INSERT INTO PRODUCTS (PRODUCT_ID, " +
+                                                "PRODUCT_CODE, " +
                                                 "PRODUCT_NAME, " +
                                                 "PRODUCT_DESCRIPTION, " +
                                                 "START_DATE, " +
@@ -85,9 +101,10 @@ public class ProductMySqlRepository implements Repositories<Product> {
                                                 "DESTINATION_CITY, " +
                                                 "PRODUCT_IMAGE, " +
                                                 "VENDOR_ID) " +
-                         "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
             template.update(sql,
+                            data.getProductId(),
                             data.getProductCode(),
                             data.getProductName(),
                             data.getProductDescription(),

@@ -2,24 +2,23 @@ package co.edu.javeriana.products.application.products;
 
 import co.edu.javeriana.products.application.dtos.products.ResponseProduct;
 import co.edu.javeriana.products.application.dtos.products.Response;
+import co.edu.javeriana.products.application.dtos.products.ResponseProductDetail;
 import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.Status;
 import co.edu.javeriana.products.events.dtos.Image;
 import co.edu.javeriana.products.events.dtos.Request;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
-import com.google.common.util.concurrent.ListenableFuture;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -39,11 +38,12 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     private final Repositories<Product> repository;
 
     @Override
-    public CompletableFuture<Response> getAllProducts() {
+    public CompletableFuture<Response> getAllProducts(Pageable paging) {
         Response response = new Response();
         co.edu.javeriana.products.application.dtos.Status status = new co.edu.javeriana.products.application.dtos.Status();
         try {
-            Optional<List<Product>> products = this.repository.findByAll();
+            Optional<Page<Product>> products = this.repository.findByAll(paging);
+
             if (!products.isPresent()) {
                 status.setCode(Status.EMPTY.name());
                 status.setDescription("There are not rows availables");
@@ -51,12 +51,21 @@ public class ProductQueryServiceImpl implements ProductQueryService {
                 return CompletableFuture.completedFuture(response);
             }
 
-            callImages(products);
+            List<Product> prd = products.get().getContent();
+
+            callImages(Optional.of(prd));
+
+            Map<String, Object> rs = new HashMap<>();
+            rs.put("products", products.get().getContent());
+            rs.put("currentPage", products.get().getNumber());
+            rs.put("totalItems", products.get().getTotalElements());
+            rs.put("totalPages", products.get().getTotalPages());
 
             status.setCode(Status.SUCCESS.name());
             status.setDescription("There are rows availables");
             response.setStatus(status);
-            response.setProducts(products.get());
+            response.setProducts(prd);
+
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
             status.setCode(Status.ERROR.name());
@@ -67,11 +76,11 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     }
 
     @Override
-    public CompletableFuture<ResponseProduct> getProductsByText(String text) {
+    public CompletableFuture<ResponseProduct> getProductsByText(String text, Pageable paging) {
         ResponseProduct response = new ResponseProduct();
         co.edu.javeriana.products.application.dtos.Status status = new co.edu.javeriana.products.application.dtos.Status();
         try {
-            Optional<List<Product>> products = this.repository.findByText(text);
+            Optional<Page<Product>> products = this.repository.findByText(text, paging);
 
             if (!products.isPresent()) {
                 status.setCode(Status.EMPTY.name());
@@ -80,12 +89,54 @@ public class ProductQueryServiceImpl implements ProductQueryService {
                 return CompletableFuture.completedFuture(response);
             }
 
-            callImages(products);
+            List<Product> prd = products.get().getContent();
+
+            callImages(Optional.of(prd));
+
+            Map<String, Object> rs = new HashMap<>();
+            rs.put("products", products.get().getContent());
+            rs.put("currentPage", products.get().getNumber());
+            rs.put("totalItems", products.get().getTotalElements());
+            rs.put("totalPages", products.get().getTotalPages());
 
             status.setCode(Status.SUCCESS.name());
             status.setDescription("There are rows availables");
             response.setStatus(status);
-            response.setProduct(products.get());
+            response.setProduct(prd);
+
+            return CompletableFuture.completedFuture(response);
+        } catch (Exception e) {
+            status.setCode(co.edu.javeriana.products.domain.Status.ERROR.name());
+            status.setDescription(String.format("Error getting rows: %s", e.getMessage()));
+            response.setStatus(status);
+
+            return CompletableFuture.completedFuture(response);
+        }
+    }
+
+    @Override
+    public CompletableFuture<ResponseProductDetail> getProductsDetail(String code) {
+        ResponseProductDetail response = new ResponseProductDetail();
+        co.edu.javeriana.products.application.dtos.Status status = new co.edu.javeriana.products.application.dtos.Status();
+        try {
+            Optional<Product> product = this.repository.findById(code);
+
+            if (!product.isPresent()) {
+                status.setCode(Status.EMPTY.name());
+                status.setDescription(String.format("There is not information for product with code: %s", code));
+                response.setStatus(status);
+                return CompletableFuture.completedFuture(response);
+            }
+
+            List<Product> products = new ArrayList<>();
+            products.add(product.get());
+
+            callImages(Optional.of(products));
+
+            status.setCode(Status.SUCCESS.name());
+            status.setDescription(String.format("There is informations for product with code: %s", code));
+            response.setStatus(status);
+            response.setProduct(product.get());
 
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {

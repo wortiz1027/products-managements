@@ -49,6 +49,11 @@ public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
     }
 
     @Override
+    public Optional<ProductType> findByCode(String code) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Page<ProductType>> findByText(String text, Pageable paging) {
         List<ProductType> types = new ArrayList<>();
         return Optional.empty();

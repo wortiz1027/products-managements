@@ -10,6 +10,7 @@ public interface Repositories<T> {
 
     Optional<Page<T>> findByAll(Pageable paging);
     Optional<T> findById(String id);
+    Optional<T> findByCode(String code);
     Optional<Page<T>> findByText(String text, Pageable paging);
     CompletableFuture<String> create(T data);
     CompletableFuture<String> update(T data);

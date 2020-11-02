@@ -28,14 +28,48 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProductQueryServiceImpl.class);
 
-    @Value("${events.rpc.exchange}")
-    private String rpcExchange;
+    @Value("${events.rpc.images.exchange}")
+    private String rpcImagesExchange;
 
-    @Value("${events.rpc.routing-key}")
-    private String rpcRoutingKey;
+    @Value("${events.rpc.images.routing-key}")
+    private String rpcImagesRoutingKey;
 
     private final AsyncRabbitTemplate template;
     private final Repositories<Product> repository;
+
+    @Override
+    public CompletableFuture<co.edu.javeriana.products.application.dtos.rpc.products.Response> getByProductById(List<String> ids) {
+        co.edu.javeriana.products.application.dtos.rpc.products.Response response = new co.edu.javeriana.products.application.dtos.rpc.products.Response();
+        co.edu.javeriana.products.application.dtos.Status status = new co.edu.javeriana.products.application.dtos.Status();
+        try {
+            List<Product> products = new ArrayList<>();
+            for (String id : ids) {
+                Optional<Product> product = this.repository.findById(id);
+                products.add(product.get());
+            }
+
+            if (products.isEmpty()) {
+                status.setCode(Status.EMPTY.name());
+                status.setDescription("There is not information for products");
+                response.setStatus(status);
+                return CompletableFuture.completedFuture(response);
+            }
+
+            callImages(Optional.of(products));
+
+            status.setCode(Status.SUCCESS.name());
+            status.setDescription("There is informations for products");
+            response.setStatus(status);
+            response.setProducts(products);
+
+            return CompletableFuture.completedFuture(response);
+        } catch(Exception e) {
+            status.setCode(Status.ERROR.name());
+            status.setDescription(String.format("There is an error getting products informations: %s", e.getMessage()));
+            response.setStatus(status);
+            return CompletableFuture.completedFuture(response);
+        }
+    }
 
     @Override
     public CompletableFuture<Response> getAllProducts(Pageable paging) {
@@ -119,7 +153,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         ResponseProductDetail response = new ResponseProductDetail();
         co.edu.javeriana.products.application.dtos.Status status = new co.edu.javeriana.products.application.dtos.Status();
         try {
-            Optional<Product> product = this.repository.findById(code);
+            Optional<Product> product = this.repository.findByCode(code);
 
             if (!product.isPresent()) {
                 status.setCode(Status.EMPTY.name());
@@ -163,8 +197,8 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
         AsyncRabbitTemplate.RabbitConverterFuture<co.edu.javeriana.products.events.dtos.Response> future =
                 this.template.convertSendAndReceiveAsType(
-                        rpcExchange,
-                        rpcRoutingKey,
+                        rpcImagesExchange,
+                        rpcImagesRoutingKey,
                         request,
                         new ParameterizedTypeReference<>() {});
 

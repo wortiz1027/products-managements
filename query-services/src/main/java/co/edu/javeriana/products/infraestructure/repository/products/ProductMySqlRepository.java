@@ -39,9 +39,39 @@ public class ProductMySqlRepository implements Repositories<Product> {
     @Override
     public Optional<Product> findById(String id) {
         try {
+            //String sql = "SELECT * FROM PRODUCTS WHERE PRODUCT_ID = ?";
+            String sql = "SELECT * " +
+                         "FROM PRODUCTS P INNER JOIN PRODUCT_TYPE PT ON (P.PRODUCT_TYPE_ID = PT.ID_TYPE) " +
+                         "WHERE PRODUCT_ID = ?";
+            return template.queryForObject(sql,
+                    new Object[]{id},
+                    (rs, rowNum) ->
+                            Optional.of(new Product(rs.getString("PRODUCT_ID"),
+                                    rs.getString("PRODUCT_CODE"),
+                                    rs.getString("PRODUCT_NAME"),
+                                    rs.getString("PRODUCT_DESCRIPTION"),
+                                    rs.getDate("START_DATE").toLocalDate(),
+                                    rs.getDate("END_DATE").toLocalDate(),
+                                    new ProductType(rs.getString("PRODUCT_TYPE_ID"), rs.getString("DESCRIPTION"), ""),
+                                    rs.getLong("PRODUCT_PRICE"),
+                                    rs.getString("ORIGIN_CITY"),
+                                    rs.getString("DESTINATION_CITY"),
+                                    new Image(rs.getString("PRODUCT_IMAGE"), ""),
+                                    rs.getString("VENDOR_ID"),
+                                    ""
+                            ))
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<Product> findByCode(String code) {
+        try {
             String sql = "SELECT * FROM PRODUCTS WHERE PRODUCT_CODE = ?";
             return template.queryForObject(sql,
-                                            new Object[]{id},
+                                            new Object[]{code},
                                             (rs, rowNum) ->
                                                     Optional.of(new Product(rs.getString("PRODUCT_ID"),
                                                                             rs.getString("PRODUCT_CODE"),

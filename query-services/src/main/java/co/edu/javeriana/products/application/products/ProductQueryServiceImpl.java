@@ -89,16 +89,17 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
             callImages(Optional.of(prd));
 
-            Map<String, Object> rs = new HashMap<>();
-            rs.put("products", products.get().getContent());
-            rs.put("currentPage", products.get().getNumber());
-            rs.put("totalItems", products.get().getTotalElements());
-            rs.put("totalPages", products.get().getTotalPages());
+            Map<String, Object> data = new HashMap<>();
+            data.put("products", prd);
+            data.put("currentPage", products.get().getNumber());
+            data.put("totalItems", products.get().getTotalElements());
+            data.put("totalPages", products.get().getTotalPages());
 
             status.setCode(Status.SUCCESS.name());
             status.setDescription("There are rows availables");
             response.setStatus(status);
-            response.setProducts(prd);
+            response.setData(data);
+            //response.setProducts(prd);
 
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
@@ -127,16 +128,16 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
             callImages(Optional.of(prd));
 
-            Map<String, Object> rs = new HashMap<>();
-            rs.put("products", products.get().getContent());
-            rs.put("currentPage", products.get().getNumber());
-            rs.put("totalItems", products.get().getTotalElements());
-            rs.put("totalPages", products.get().getTotalPages());
+            Map<String, Object> data = new HashMap<>();
+            data.put("products", prd);
+            data.put("currentPage", products.get().getNumber());
+            data.put("totalItems", products.get().getTotalElements());
+            data.put("totalPages", products.get().getTotalPages());
 
             status.setCode(Status.SUCCESS.name());
             status.setDescription("There are rows availables");
             response.setStatus(status);
-            response.setProduct(prd);
+            response.setData(data);
 
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {

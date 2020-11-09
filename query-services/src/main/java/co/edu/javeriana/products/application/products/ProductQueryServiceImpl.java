@@ -141,6 +141,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
+            e.printStackTrace();
             status.setCode(co.edu.javeriana.products.domain.Status.ERROR.name());
             status.setDescription(String.format("Error getting rows: %s", e.getMessage()));
             response.setStatus(status);

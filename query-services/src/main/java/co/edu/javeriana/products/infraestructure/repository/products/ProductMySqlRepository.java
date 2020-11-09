@@ -10,6 +10,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.PageImpl;
 
@@ -104,14 +106,23 @@ public class ProductMySqlRepository implements Repositories<Product> {
 
             List<Product> products = this.template.query(String.format(sql, paging.getPageSize(), paging.getOffset()), new Object[] { text }, new ProductRowMapper());
 
-            return Optional.of(new PageImpl<>(products, paging, count()));
+            return Optional.of(new PageImpl<>(products, paging, countByText(text)));
         } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
             return Optional.empty();
         }
     }
 
     private int count() {
         return this.template.queryForObject("SELECT count(*) FROM PRODUCTS", Integer.class);
+    }
+
+    private int countByText(String text) {
+        String sql = "SELECT count(*) " +
+                    "FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE " +
+                    "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? ) " +
+                    "ORDER BY PRODUCT_CODE ASC ";
+        return this.template.queryForObject(sql, Integer.class, text);
     }
 
     @Override

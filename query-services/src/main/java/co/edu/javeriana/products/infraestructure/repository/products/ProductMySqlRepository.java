@@ -1,11 +1,14 @@
 package co.edu.javeriana.products.infraestructure.repository.products;
 
+import co.edu.javeriana.products.application.products.ProductQueryServiceImpl;
 import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.ProductType;
 import co.edu.javeriana.products.domain.Status;
 import co.edu.javeriana.products.events.dtos.Image;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ProductMySqlRepository implements Repositories<Product> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProductMySqlRepository.class);
     private final JdbcTemplate template;
 
     @Override
@@ -98,9 +102,10 @@ public class ProductMySqlRepository implements Repositories<Product> {
     @Override
     public Optional<Page<Product>> findByText(String text, Pageable paging) {
         try {
+            LOG.debug("TEXTO: {}", text);
             String sql = "SELECT * " +
                          "FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE " +
-                         "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? ) " +
+                         "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? IN BOOLEAN MODE ) " +
                          "ORDER BY PRODUCT_CODE ASC " +
                          "LIMIT %d OFFSET %d";
 
@@ -120,7 +125,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
     private int countByText(String text) {
         String sql = "SELECT count(*) " +
                     "FROM PRODUCTS INNER JOIN PRODUCT_TYPE PT on PRODUCTS.PRODUCT_TYPE_ID = PT.ID_TYPE " +
-                    "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? ) " +
+                    "WHERE MATCH(PRODUCT_CODE, PRODUCT_NAME, PRODUCT_DESCRIPTION) AGAINST ( ? IN BOOLEAN MODE ) " +
                     "ORDER BY PRODUCT_CODE ASC ";
         return this.template.queryForObject(sql, Integer.class, text);
     }

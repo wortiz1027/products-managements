@@ -191,7 +191,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         for (Product row : products.get()) {
             ids = ids.concat(row.getImage().getId()).concat(",");
         }
-
+        LOG.info("ID_PRODUCTS: {}", ids);
         LOG.info(ids.substring(0, ids.length() - 1));
 
         Request request = new Request();

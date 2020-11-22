@@ -37,17 +37,20 @@ public class EventHandler {
 
         if (data.getStatus().equalsIgnoreCase(Status.CREATED.name()) && product.isEmpty()) {
             this.products.create(data);
+            LOG.info("Product with code [{}] has been saved", data.getProductCode());
         }
 
-        if (data.getStatus().equalsIgnoreCase(Status.UPDATED.name()) && !product.isPresent()) {
+        if (data.getStatus().equalsIgnoreCase(Status.UPDATED.name()) && product.isPresent()) {
             this.products.update(data);
+            LOG.info("Product with code [{}] has been updated", data.getProductCode());
         }
 
-        if (data.getStatus().equalsIgnoreCase(Status.DELETED.name()) && !product.isPresent()) {
+        if (data.getStatus().equalsIgnoreCase(Status.DELETED.name()) && product.isPresent()) {
             this.products.delete(data);
+            LOG.info("Product with code [{}] has been deleted", data.getProductCode());
         }
 
-        LOG.info("Product with code [{}] has been saved", data.getProductCode());
+        LOG.info("PRODUCT_INFORMATION: {}", data.getProductCode());
     }
 
 }

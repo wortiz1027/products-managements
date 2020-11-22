@@ -45,7 +45,6 @@ public class ProductMySqlRepository implements Repositories<Product> {
     @Override
     public Optional<Product> findById(String id) {
         try {
-            //String sql = "SELECT * FROM PRODUCTS WHERE PRODUCT_ID = ?";
             String sql = "SELECT * " +
                          "FROM PRODUCTS P INNER JOIN PRODUCT_TYPE PT ON (P.PRODUCT_TYPE_ID = PT.ID_TYPE) " +
                          "WHERE PRODUCT_ID = ?";
@@ -173,35 +172,38 @@ public class ProductMySqlRepository implements Repositories<Product> {
     @Override
     public CompletableFuture<String> update(Product data) {
         try {
-            if (findById(data.getProductCode()).isEmpty()) return CompletableFuture.completedFuture(Status.NO_EXIST.name());
+            if (findById(data.getProductId()).isEmpty()) return CompletableFuture.completedFuture(Status.NO_EXIST.name());
 
             String sql = "UPDATE PRODUCTS SET " +
-                                    "PRODUCT_NAME = ?, " +
-                                    "PRODUCT_DESCRIPTION = ?, " +
-                                    "START_DATE = ?, " +
-                                    "END_DATE = ?, " +
-                                    "PRODUCT_TYPE_ID = ?, " +
-                                    "PRODUCT_PRICE = ?, " +
-                                    "ORIGIN_CITY = ?, " +
-                                    "DESTINATION_CITY = ?, " +
-                                    "PRODUCT_IMAGE = ?, " +
-                                    "VENDOR_ID = ?" +
-                         "WHERE PRODUCT_CODE = ? " ;
+                                "PRODUCT_CODE = ?, " +
+                                "PRODUCT_NAME = ?, " +
+                                "PRODUCT_DESCRIPTION = ?, " +
+                                "START_DATE = ?, " +
+                                "END_DATE = ?, " +
+                                "PRODUCT_TYPE_ID = ?, " +
+                                "PRODUCT_PRICE = ?, " +
+                                "ORIGIN_CITY = ?, " +
+                                "DESTINATION_CITY = ?, " +
+                                "PRODUCT_IMAGE = ?, " +
+                                "VENDOR_ID = ? " +
+                                "WHERE PRODUCT_ID = ? " ;
 
-            this.template.update(sql, data.getProductName(),
-                                      data.getProductDescription(),
-                                      data.getStartDate(),
-                                      data.getEndDate(),
-                                      data.getType().getId(),
-                                      data.getProductPrice(),
-                                      data.getOriginCity(),
-                                      data.getDestinationCity(),
-                                      data.getImage().getId(),
-                                      data.getVendorId(),
-                                      data.getProductCode());
+            this.template.update(sql, data.getProductCode(),
+                                    data.getProductName(),
+                                    data.getProductDescription(),
+                                    data.getStartDate(),
+                                    data.getEndDate(),
+                                    data.getType().getId(),
+                                    data.getProductPrice(),
+                                    data.getOriginCity(),
+                                    data.getDestinationCity(),
+                                    data.getImage().getId(),
+                                    data.getVendorId(),
+                                    data.getProductId());
 
             return CompletableFuture.completedFuture(Status.UPDATED.name());
         } catch (Exception e) {
+            e.printStackTrace();
             return CompletableFuture.completedFuture(Status.ERROR.name());
         }
     }
@@ -209,11 +211,11 @@ public class ProductMySqlRepository implements Repositories<Product> {
     @Override
     public CompletableFuture<String> delete(Product data) {
         try {
-            if (findById(data.getProductCode()).isEmpty()) return CompletableFuture.completedFuture(Status.NO_EXIST.name());
+            if (findById(data.getProductId()).isEmpty()) return CompletableFuture.completedFuture(Status.NO_EXIST.name());
 
-            String sql = "DELETE FROM PRODUCTS WHERE PRODUCT_CODE = ?";
+            String sql = "DELETE FROM PRODUCTS WHERE PRODUCT_ID = ?";
 
-            this.template.update(sql, data.getProductCode());
+            this.template.update(sql, data.getProductId());
 
             return CompletableFuture.completedFuture(Status.DELETED.name());
         } catch (Exception e) {

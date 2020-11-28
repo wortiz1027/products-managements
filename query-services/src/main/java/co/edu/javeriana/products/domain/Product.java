@@ -62,7 +62,7 @@ public class Product implements java.io.Serializable {
 
     @ApiModelProperty(notes = "Campo con el identificador del proveedor")
     @JsonProperty("vendorId")
-    private String vendorId;
+    private Vendor vendor;
 
     @ApiModelProperty(notes = "Campo que informa el estado del producto")
     @JsonProperty("status")

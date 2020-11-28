@@ -1,9 +1,7 @@
 package co.edu.javeriana.products.infraestructure.repository.products;
 
 import co.edu.javeriana.products.application.products.ProductQueryServiceImpl;
-import co.edu.javeriana.products.domain.Product;
-import co.edu.javeriana.products.domain.ProductType;
-import co.edu.javeriana.products.domain.Status;
+import co.edu.javeriana.products.domain.*;
 import co.edu.javeriana.products.events.dtos.Image;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +60,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                                     rs.getString("ORIGIN_CITY"),
                                     rs.getString("DESTINATION_CITY"),
                                     new Image(rs.getString("PRODUCT_IMAGE"), ""),
-                                    rs.getString("VENDOR_ID"),
+                                    new Vendor(rs.getString("VENDOR_ID"), "", "", new VendorTypes("", ""), "", "", "", "", "", "", ""),
                                     ""
                             ))
             );
@@ -89,7 +87,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                                                                             rs.getString("ORIGIN_CITY"),
                                                                             rs.getString("DESTINATION_CITY"),
                                                                             new Image(rs.getString("PRODUCT_IMAGE"), ""),
-                                                                            rs.getString("VENDOR_ID"),
+                                                                            new Vendor(rs.getString("VENDOR_ID"), "", "", new VendorTypes("", ""), "", "", "", "", "", "", ""),
                                                                             ""
                                                     ))
                                     );
@@ -160,7 +158,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                             data.getOriginCity(),
                             data.getDestinationCity(),
                             data.getImage().getId(),
-                            data.getVendorId());
+                            data.getVendor().getIdProvider());
 
             return CompletableFuture.completedFuture(Status.CREATED.name());
         } catch(Exception e) {
@@ -198,7 +196,7 @@ public class ProductMySqlRepository implements Repositories<Product> {
                                     data.getOriginCity(),
                                     data.getDestinationCity(),
                                     data.getImage().getId(),
-                                    data.getVendorId(),
+                                    data.getVendor().getIdProvider(),
                                     data.getProductId());
 
             return CompletableFuture.completedFuture(Status.UPDATED.name());

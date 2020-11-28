@@ -3,8 +3,11 @@ package co.edu.javeriana.products.application.products;
 import co.edu.javeriana.products.application.dtos.products.ResponseProduct;
 import co.edu.javeriana.products.application.dtos.products.Response;
 import co.edu.javeriana.products.application.dtos.products.ResponseProductDetail;
+import co.edu.javeriana.products.application.dtos.products.ResponseVendors;
 import co.edu.javeriana.products.domain.Product;
 import co.edu.javeriana.products.domain.Status;
+import co.edu.javeriana.products.domain.Vendor;
+import co.edu.javeriana.products.domain.VendorTypes;
 import co.edu.javeriana.products.events.dtos.Image;
 import co.edu.javeriana.products.events.dtos.Request;
 import co.edu.javeriana.products.infraestructure.repository.Repositories;
@@ -13,11 +16,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -34,8 +44,18 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     @Value("${events.rpc.images.routing-key}")
     private String rpcImagesRoutingKey;
 
+    @Value("${rest.vendors.uri}")
+    private String vendorUri;
+
+    @Value("${rest.vendors.services-id}")
+    private String servicesId;
+
     private final AsyncRabbitTemplate template;
     private final Repositories<Product> repository;
+
+    private final DiscoveryClient discoveryClient;
+
+    private final RestTemplate restTemplate;
 
     @Override
     public CompletableFuture<co.edu.javeriana.products.application.dtos.rpc.products.Response> getByProductById(List<String> ids) {
@@ -56,6 +76,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
             }
 
             callImages(Optional.of(products));
+            getVendors(Optional.of(products));
 
             status.setCode(Status.SUCCESS.name());
             status.setDescription("There is informations for products");
@@ -88,6 +109,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
             List<Product> prd = products.get().getContent();
 
             callImages(Optional.of(prd));
+            getVendors(Optional.of(prd));
 
             Map<String, Object> data = new HashMap<>();
             data.put("products", prd);
@@ -99,7 +121,6 @@ public class ProductQueryServiceImpl implements ProductQueryService {
             status.setDescription("There are rows availables");
             response.setStatus(status);
             response.setData(data);
-            //response.setProducts(prd);
 
             return CompletableFuture.completedFuture(response);
         } catch (Exception e) {
@@ -127,6 +148,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
             List<Product> prd = products.get().getContent();
 
             callImages(Optional.of(prd));
+            getVendors(Optional.of(prd));
 
             Map<String, Object> data = new HashMap<>();
             data.put("products", prd);
@@ -168,6 +190,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
             products.add(product.get());
 
             callImages(Optional.of(products));
+            getVendors(Optional.of(products));
 
             status.setCode(Status.SUCCESS.name());
             status.setDescription(String.format("There is informations for product with code: %s", code));
@@ -219,7 +242,54 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Cannot get response.", e);
         }
+    }
 
+    private void getVendors(Optional<List<Product>> products) {
+        List<ServiceInstance> instances = discoveryClient.getInstances(servicesId);
+
+        ServiceInstance serviceInstance = instances.get(0);
+
+        String url = serviceInstance.getUri().toString();
+
+        url = url + vendorUri;
+
+        String request = "";
+
+        for (Product row : products.get()) {
+            request = request.concat(row.getVendor().getIdProvider()).concat(",");
+        }
+
+        ResponseEntity<ResponseVendors> response = null;
+
+        UriComponents builder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("ids", request)
+                .build();
+
+        try{
+            response = restTemplate.exchange(builder.toUriString(),
+                                             HttpMethod.POST,
+                                             getHeaders(),
+                                             ResponseVendors.class);
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println(ex);
+        }
+
+        for (Product row : products.get()) {
+            for (Vendor vendor : response.getBody().getVendors()) {
+                if (row.getVendor().getIdProvider().equalsIgnoreCase(vendor.getIdProvider())) {
+                    row.setVendor(vendor);
+                }
+            }
+        }
+
+        System.out.println(response.getBody());
+    }
+
+    private static HttpEntity<?> getHeaders() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        return new HttpEntity<>(headers);
     }
 
  }

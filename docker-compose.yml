@@ -9,7 +9,7 @@
 version: '3.7'
 services:
   products-command-services:
-    image: products-command-services:latest
+    image: wortiz1027/products-command-services:latest
     container_name: products-command-services
     hostname: products-command-services
     restart: always
@@ -18,7 +18,7 @@ services:
     networks:
       - ntw_backend
   products-query-services:
-    image: products-query-services:latest
+    image: wortiz1027/products-query-services:latest
     container_name: products-query-services
     hostname: products-query-services
     restart: always

@@ -25,9 +25,11 @@ public class ProductTypeMySqlRepository  implements Repositories<ProductType> {
 
     @Override
     public Optional<Page<ProductType>> findByAll(Pageable paging) {
-        String sql = "SELECT * FROM PRODUCT_TYPE";
-        List<ProductType> types = this.template.query(sql, new ProductTypesRowMapper());
-        return Optional.of(new PageImpl<ProductType>(types, paging, count()));
+        String sql = "SELECT * " +
+                     "FROM PRODUCT_TYPE " +
+                     "LIMIT %d OFFSET %d";
+        List<ProductType> types = this.template.query(String.format(sql, paging.getPageSize(), paging.getOffset()), new ProductTypesRowMapper());
+        return Optional.of(new PageImpl<>(types, paging, count()));
     }
 
     @Override

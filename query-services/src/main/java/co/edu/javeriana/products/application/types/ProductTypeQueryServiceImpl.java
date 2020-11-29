@@ -34,7 +34,14 @@ public class ProductTypeQueryServiceImpl implements ProductTypeQueryService {
                 response.setStatus(status);
                 return CompletableFuture.completedFuture(response);
             }
+
+            System.out.println("---> " + types.get().getContent().size());
+            System.out.println("---> " + types.get().getContent().get(0).getDescription());
             List<ProductType> tps = types.get().getContent();
+
+            for (ProductType pt : types.get().getContent()) {
+                System.out.println(pt.getDescription());
+            }
 
             status.setCode(co.edu.javeriana.products.domain.Status.SUCCESS.name());
             status.setDescription("Rows found!");
@@ -43,6 +50,7 @@ public class ProductTypeQueryServiceImpl implements ProductTypeQueryService {
 
             return CompletableFuture.completedFuture(response);
         } catch(Exception e) {
+            e.printStackTrace();
             status.setCode(co.edu.javeriana.products.domain.Status.ERROR.name());
             status.setDescription(String.format("Error getting rows: %s", e.getMessage()));
             response.setStatus(status);
